@@ -1,47 +1,57 @@
-/**
- * The RandomStringValidator program generates random words infinitely
- * until a valid word has been found
- * @author Billy Stanton
- */
-
 import java.io.*;
 import java.util.*;
 
+/**
+ * Generates Random Strings and checks validity against a dictionary
+ * @author William Stanton
+ */
 public class RandomStringValidator {
 
-    public static void main(String[] args) throws FileNotFoundException {
-        // import file with words
-        Dictionary dict = new Dictionary("words.txt");
-        
-        // generate random words and check them against dict
-        int hits = 0;
-        while (true) {
-            String randWord = generateString();
-            if (dict.isValid(randWord)) {
-                hits++;
-                System.out.println("HIT " + hits + " : " + randWord);
+    /**
+     * Main Driver
+     */
+    public static void main(String[] args) {
+        // Initialize stats
+        int hits = 0, tries = 0;
+
+        // Initialize & start-up application
+        try {
+            // Initialize Dictionary
+            Dictionary dict = new Dictionary("words.txt");
+
+            // Generate string and check against dict
+            while (true) {
+                String randWord = generateString();
+                if (dict.isValid(randWord)) {
+                    hits++;
+                    System.out.println("HIT (" + randWord + ") | " + hits + " / " + tries);
+                }
+                tries++;
             }
+        } catch (FileNotFoundException e) {
+            System.out.println(e.getMessage());
+            System.exit(0);
         }
     }
     
     /**
-     * The generate word class generates a random string of letters
-     * @return a random String
+     * Generates a random String of letters
+     * @return random String of letters
      */
     public static String generateString() {
-        // init
+        // Initialization
         String alphabet = "abcdefghijklmnopqrstuvwxyz";
         String randString = "";
-        Random randGenerator = new Random();
+        var rand = new Random();
         
-        // generate random length
-        int length = randGenerator.nextInt(7)+4;
-        
-        // generate random string of letters of length
-        for (int i = 0; i < length; i++) {
-            randString += alphabet.charAt(randGenerator.nextInt(alphabet.length()));
-        }
-        
+        // Generate random word length
+        int length = rand.nextInt(9)+1; // 1-8
+
+        // Generate random String of specified length
+        for (int i = 0; i < length; i++)
+            randString += alphabet.charAt(rand.nextInt(alphabet.length()));
+
+        // Return random String
         return randString;
     }
 }

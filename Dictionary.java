@@ -1,75 +1,63 @@
-/**
- * The dictionary class holds all of the English words
- * and provides methods to check the generated word against
- * @author Billy Stanton
- */
 import java.io.*;
 import java.util.*;
 
+/**
+ * Holds the English word Dictionary and provides a method to check words against
+ * @author William Stanton
+ */
 public class Dictionary {
-    // declare
+    // Declare Variables
     private String filename; // file name of word list
-    private String[] wordList;
+    private String[] dictionary;
 
-    // initialize
+    // Initialize Variables
     public Dictionary(String filename) throws FileNotFoundException {
         this.filename = filename;
-        setWordList(); // load the words
+        initDictionary();; // load the words
     }
     
     /**
-     * The setWords method creates the wordList
-     * @throws FileNotFoundException 
+     * Initializes Dictionary
      */
-    private void setWordList() throws FileNotFoundException {
-        // initialize
-        File wordListFile = new File(filename); // word list
-        Scanner wordListCounter = new Scanner(wordListFile);
-        Scanner wordListReader = new Scanner(wordListFile);
+    private void initDictionary() throws FileNotFoundException {
+        // Initialize Variables
+        var file = new File(filename); // word list
+        var reader = new Scanner(file);
 
-        // get file length
-        int c = 0; // count file length
-        while (wordListCounter.hasNextLine()) {
+        // Count dictionary file length
+        int c = 0;
+        while (reader.hasNextLine()) {
             c++;
-            wordListCounter.nextLine();
+            reader.nextLine();
         }
+
+        // Initialize array with file length
+        dictionary = new String[c]; // array to contain words
         
-        wordList = new String[c]; // array to contain words
-        
-        // load the words
+        // Re-initialize reader & load the dictionary
+        reader = new Scanner(file);
         int i = 0;
-        while(wordListReader.hasNextLine()) {
-            wordList[i] = wordListReader.nextLine();
+        while(reader.hasNextLine()) {
+            dictionary[i] = reader.nextLine();
             i++;
         }
     }
     
     /**
-     * The getWordList method returns the word list
-     * @return the word list array
+     * Returns Dictionary
+     * @return dictionary array
      */
-    public String[] getWordList() {
-        return wordList;
+    public String[] getDictionary() {
+        return dictionary;
     }
-    
+
     /**
-     * The isValid method returns whether a word is valid or not
-     * @param word  the word to check
-     * @return true/false if the word is valid or not
+     * Returns word validity
+     * @param word word to check
+     * @return word validity
      */
     public boolean isValid(String word) {
-        // init
-        boolean validWord = false;
-        
-        // check each word
-        for (int i = 0; i < wordList.length; i++) {
-            if (wordList[i].equalsIgnoreCase(word)) {
-                validWord = true;
-                break;
-            }     
-        }
-        
-        // true/false if the word is valid or not
-        return validWord;
+        // Return results
+        return Arrays.binarySearch(dictionary, word) >= 0;
     }
 }
