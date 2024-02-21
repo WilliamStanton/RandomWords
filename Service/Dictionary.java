@@ -83,4 +83,12 @@ public class Dictionary {
     public Word[] getDictionary() {
         return dictionary;
     }
+
+    public int getMin() {
+        return min;
+    }
+
+    public int getMax() {
+        return max;
+    }
 }
