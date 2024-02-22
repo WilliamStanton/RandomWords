@@ -1,7 +1,7 @@
-import Service.Dictionary;
+import Service.DictionaryService;
+import Service.GCheckService;
 
 import java.io.*;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -11,9 +11,11 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 public class Main {
     // App Config
-    private static final int MIN_LENGTH = 8; // min word length
+    private static final int MIN_LENGTH = 4; // min word length
     private static final int MAX_LENGTH = 8; // max word length
-    private static final int THREAD_COUNT = 24; // thread count
+    private static final int THREAD_COUNT = 12; // thread count
+    private static final AtomicLong HITS = new AtomicLong(1); // Hits Counter
+    private static final AtomicLong TRIES = new AtomicLong(1); // Tries Counter
 
     /**
      * Main Driver
@@ -21,60 +23,27 @@ public class Main {
     public static void main(String[] args) throws FileNotFoundException {
         try {
             // Initialization
-            Dictionary dict = new Dictionary("words.txt", MIN_LENGTH, MAX_LENGTH);
-            System.out.printf("Starting App:\nCharacters: %d-%d\nDictionary: %d words\n------------------------\n", MIN_LENGTH, MAX_LENGTH, dict.getDictionary().length);
+            DictionaryService dict = new DictionaryService("words.txt", MIN_LENGTH, MAX_LENGTH);
+            int dictLength = dict.getDictionary().length;
+            System.out.printf("Starting App:\nCharacters: %d-%d\nDictionary: %d words\n------------------------\n", MIN_LENGTH, MAX_LENGTH, dictLength);
 
             // Start Threads
-            Task task = new Task(dict);
+            var task = new GCheckService(dict);
             for (int i = 0; i < THREAD_COUNT; i++) {
-                new Threads(String.valueOf(i), task).start();
+                new Thread(() -> {
+                        while (HITS.get() != dictLength) {
+                            var word = task.checkString();
+                            TRIES.getAndIncrement();
+                            if (word != null) {
+                                System.out.printf("%s | %,2d / %,2d - (Attempt %,2d)\n", word, Long.parseLong(HITS.toString()), dictLength, Long.parseLong(TRIES.toString()));
+                                HITS.getAndIncrement();
+                            }
+                        }
+                }).start();
             }
         } catch (FileNotFoundException e) {
             System.out.println(e.getMessage());
             System.exit(0);
-        }
-    }
-}
-
-/**
- * Threading System
- */
-class Threads extends Thread {
-    // Fields
-    private Thread t;
-    private final String threadName;
-    private final Task task;
-    private final int dictLength;
-    private static final AtomicLong hits = new AtomicLong(1);
-    private static final AtomicLong tries = new AtomicLong(1);
-
-    public Threads(String threadName, Task task) {
-        this.threadName = threadName;
-        this.task = task;
-        this.dictLength = task.getDictionary().getDictionary().length;
-    }
-
-    /**
-     * Run thread
-     */
-    public void run() {
-        while (hits.get() != dictLength) {
-            var word = task.app();
-            tries.getAndIncrement();
-            if (word != null) {
-                System.out.printf("%s | %,2d / %,2d - (Attempt %,2d)\n", word, Long.parseLong(hits.toString()), dictLength, Long.parseLong(tries.toString()));
-                hits.getAndIncrement();
-            }
-        }
-    }
-
-    /**
-     * Start thread
-     */
-    public void start() {
-        if (t == null) {
-            t = new Thread(this, threadName);
-            t.start();
         }
     }
 }
